@@ -1,0 +1,47 @@
+() => {
+	var data = {};
+
+	//isHidden helper function
+	// See https://stackoverflow.com/questions/19669786/check-if-element-is-visible-in-dom
+	function isHidden(el) {
+		//if(el == null) return true;
+		//return (el.offsetParent === null)
+		//Slower
+		var style = window.getComputedStyle(el);
+		return (style.display === 'none')
+	}
+
+	//XPath wrapper function
+	function getElementByXPath(path) {
+		return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+	}
+
+	//XPath wrapper function returing an iterator
+	function getElementsByXPath(path) {
+		return document.evaluate(path, document, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+	}
+
+	{%for key, value in settings.items() %}
+		//{{key}}
+		{% if key == "coverage" %}
+			xpaths = getElementsByXPath('{{value}}');  
+			for (let i = 0, length = xpaths.snapshotLength; i < length; ++i) {
+
+				if(isHidden(xpaths.snapshotItem(i)) == false){
+					data["coverage"] = xpaths.snapshotItem(i);
+				}
+			}
+		{% else %}	
+			data["{{key}}"] = getElementByXPath('{{value}}');  
+		{%endif %}
+
+	{% endfor %}
+
+	//loop twice to avoid bug with url_index and url_not_index
+
+	{%for key, value in settings.items() %}
+		data["{{key}}"] = data["{{key}}"] && data["{{key}}"].textContent;
+	{%endfor %}
+
+	return data;
+}
