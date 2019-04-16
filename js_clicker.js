@@ -1,22 +1,26 @@
-() => {
+action => {
 
 	//XPath wrapper function
 	function getElementByXPath(path) {
 		return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
 
-	{% if key == "test_live" %}
+	//Clicking actions from selectors
+	
 
-		e = getElementByXPath('{{xpath}}');
-		e.click();
+	if( action == 'test_live' ){
+		e = getElementByXPath('//span[text()="Test live URL"]');
+		e.click();	
+	};
 
-	{% endif %}
+	
 
-	{% if key == "submit_url" %}
+	if( action == 'request_indexing' ){
+		e = getElementByXPath('//span[text()="Request indexing"]');
+		e.click();	
+	};
 
-		e = getElementByXPath('{{xpath}}');
-		e.click();
+	
 
-	{% endif %}
 
 }

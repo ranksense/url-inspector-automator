@@ -11,7 +11,8 @@ import configparser
 from jinja2 import Template
 import pandas as pd
 from time import sleep
-import pickle as pkl
+#import pickle as pkl
+from urllib.parse import urlparse
 
 UIClass, QtBaseClass = uic.loadUiType("url_inspector_automator.ui")
 
@@ -46,20 +47,8 @@ class URLInspector(UIClass, QtBaseClass):
 
 		print("Selectors loaded")
 
-		#convert config[EXTRACTION]to JS extractor
-		self.extraction_fn=self.generate_javascript_extractor()
-
-		#save extractor
-		with open("js_extractor.js", "w+") as f:
-			f.write(self.extraction_fn)
-
-		#convert config[CLICKS]to JS clicker
-		self.clicking_fn=self.generate_javascript_clicker()
-
-		#save extractor
-		with open("js_clicker.js", "w+") as f:
-			f.write(self.clicking_fn)
-
+		#convert config to JS files to inject into Chrome
+		self.generate_javascript_files()
 
 		self.headers = self.add_headers() #do once
 
@@ -86,9 +75,6 @@ class URLInspector(UIClass, QtBaseClass):
 		#and https://pythonspot.com/pyqt5-table/
 
 		rowPosition = self.resultsWidget.rowCount()
-
-		#save result
-		#self.results.append(data)
 
 		#insert empty row
 		self.resultsWidget.insertRow(rowPosition)
@@ -120,34 +106,7 @@ class URLInspector(UIClass, QtBaseClass):
 			self.urlsNotIndexed.insertPlainText(url+"\n")
 
 
-	def generate_javascript_extractor(self):
-
-		action_text = self.actionBox.currentText()
-		#print(action_text)
-
-		submit_sel = self.config["CLICKS"]["request_indexing"]
-
-		#print(submit_sel)
-
-		test_live_sel = self.config["CLICKS"]["test_live"]
-
-		#print(test_live_sel)
-
-		criteria = self.notIndexCriteria.text()
-
-		#print(criteria)
-
-		#determine if we will take action
-		if action_text == "Test Live Not Indexed URLs":
-			click_selector = test_live_sel
-
-		elif action_text == "Submit Not Indexed URLs":
-			click_selector = submit_sel
-		else: #do nothing
-			click_selector = None
-			#print("Nothing")
-
-		#print(click_selector)
+	def generate_javascript_files(self):
 
 		#Javascript arrow function jinja2 template
 		with open("js_extractor.jinja2") as f:
@@ -156,7 +115,16 @@ class URLInspector(UIClass, QtBaseClass):
 		template=Template(template_text)
 
 		#combine template with relevant section in configuration file
-		return template.render(settings=self.config["EXTRACTION"])
+		self.extraction_fn = template.render(settings=self.config["EXTRACTION"])
+
+		#Javascript arrow function jinja2 template
+		with open("js_clicker.jinja2") as f:
+			template_text=f.read()
+
+		template=Template(template_text)
+
+		self.clicking_fn = template.render(settings=self.config["CLICKS"])
+
 
 	# named slot
 	# (doesn't require a previously built connection for form widgets)
@@ -197,15 +165,10 @@ class URLInspector(UIClass, QtBaseClass):
 
 				delay = int(self.delay.text())
 
-				#self.auto = ChromeAutomator(submit_sel=submit_sel, test_live_sel=test_live_sel, delay=delay)
-				self.auto = ChromeAutomator() #delay=delay)
+				self.auto = ChromeAutomator() 
 
-				asyncio.get_event_loop().run_until_complete(self.auto.connect(ws, self.extraction_fn))
+				asyncio.get_event_loop().run_until_complete(self.auto.connect(ws, self.extraction_fn, self.clicking_fn))
 				
-				#reset GSC Home
-				asyncio.get_event_loop().run_until_complete(self.auto.visit_site(self.website.text()))
-
-
 
 	def launchChromeThread(self):
 		# do something
@@ -217,7 +180,6 @@ class URLInspector(UIClass, QtBaseClass):
 
 		with open("chrome.txt", "w+") as chrome_output: #save Chrome output to file
 		#with open(FIFO, "w") as chrome_output: #save Chrome output to file
- 
  
 			#works
 			#proc=subprocess.Popen(args, stdout=subprocess.PIPE) #stderr=subprocess.DEVNULL)#, , stderr=subprocess.PIPE)
@@ -231,32 +193,32 @@ class URLInspector(UIClass, QtBaseClass):
 	def inspectURLs(self):
 		# do something
 		print("Launched InspectURLs")  #
-		website = self.website.text()
-		#print(website)
 
 		urls = self.urls2Check.toPlainText().split()
 
-		#submit = self.submitNotIndexed.isChecked()
+		if len(urls) == 0:
+			QtWidgets.QMessageBox.about(self, "Inspect URLs", "Please provide absolute URLs. For example: https://www.ranksense.com/")
+				return
 
-		#criteria = self.notIndexCriteria.text()
-
-		#print(urls)
-
-		absolute_urls = [ urljoin(website, url) for url in urls ]
+		for url in urls:
+			if urlparse(url).netloc == "":
+				QtWidgets.QMessageBox.about(self, "Inspect URLs", "Please provide absolute URLs. For example: https://www.ranksense.com/")
+				return
 
 		#print(absolute_urls) #there is no text() in QTextEdit
 		criteria = self.notIndexCriteria.text()  
 		action = self.actionBox.currentText()
 
-		#Reset GSC home
-		#print("Reset Google Search Console Home to {home}".format(home=website))
-		#asyncio.get_event_loop().run_until_complete(self.auto.visit_site(website))
-
+		#inspect URL delay
 		delay = self.delay.text()
 		delay = int(delay)
 
+		#action delay
+		action_delay = self.delay_2.text()
+		action_delay = int(action_delay)
+
 		#comment below to debug without live Chrome 
-		self.results = asyncio.get_event_loop().run_until_complete(self.auto.inspect_urls(absolute_urls, website, criteria, action, delay))
+		self.results = asyncio.get_event_loop().run_until_complete(self.auto.inspect_urls(urls, criteria, action, delay, action_delay))
 
 		#TO DEBUG
 
@@ -275,9 +237,6 @@ class URLInspector(UIClass, QtBaseClass):
 		#enable exportResults
 		self.pushButton_2.setEnabled(True)
 
-		#add not indexed urls
-		#self.add_no_indexed_urls()
-
 		#enable submit URLs
 		self.urlsNotIndexed.setEnabled(True)
 
@@ -288,12 +247,9 @@ class URLInspector(UIClass, QtBaseClass):
 		#update headers
 		self.add_headers()
 
-		#update js extractor
-		self.extraction_fn=self.generate_javascript_extractor()
+		#update generated js files
+		self.generate_javascript_files()
 
-		#save updated extractor
-		with open("js_extractor.js", "w+") as f:
-			f.write(self.extraction_fn)
 
 	# named slot
 	@QtCore.pyqtSlot()

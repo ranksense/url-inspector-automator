@@ -1,19 +1,17 @@
-() => {
+action => {
 
 	//XPath wrapper function
 	function getElementByXPath(path) {
 		return document.evaluate(path, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 	}
 
-
+	//Clicking actions from selectors
 	{%for key, value in settings.items() %}
 
-	{% if action == key %}
-
+	if( action == '{{key}}' ){
 		e = getElementByXPath('{{value}}');
-		e.click();
-
-	{% endif %}
+		e.click();	
+	};
 
 	{% endfor %}
 

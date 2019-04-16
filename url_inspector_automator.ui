@@ -54,32 +54,6 @@
      <string>User folder:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="website">
-    <property name="geometry">
-     <rect>
-      <x>150</x>
-      <y>40</y>
-      <width>251</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>https://www.marcopromos.com</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>30</x>
-      <y>40</y>
-      <width>111</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Website to check:</string>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_3">
     <property name="geometry">
      <rect>
@@ -90,10 +64,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Delay between checks:</string>
+     <string>Delay between actions:</string>
     </property>
    </widget>
-   <widget class="QSpinBox" name="delay">
+   <widget class="QSpinBox" name="delay_2">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -103,10 +77,10 @@
      </rect>
     </property>
     <property name="minimum">
-     <number>8</number>
+     <number>80</number>
     </property>
     <property name="maximum">
-     <number>30</number>
+     <number>80</number>
     </property>
    </widget>
    <widget class="QLabel" name="label_4">
@@ -135,10 +109,7 @@
      <enum>QAbstractScrollArea::AdjustToContents</enum>
     </property>
     <property name="plainText">
-     <string>/
-/category/24-hour-promotional-items
-/Product/FRN-DELEGATE/H1-2662
-/category/24-hour-quick-ship-bags</string>
+     <string/>
     </property>
    </widget>
    <widget class="QLabel" name="label_5">
@@ -377,6 +348,48 @@
       <string>Submit Not Indexed URLs</string>
      </property>
     </item>
+   </widget>
+   <widget class="QLabel" name="label_11">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>40</y>
+      <width>111</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>seconds</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="delay">
+    <property name="geometry">
+     <rect>
+      <x>180</x>
+      <y>40</y>
+      <width>41</width>
+      <height>24</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>8</number>
+    </property>
+    <property name="maximum">
+     <number>30</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>40</y>
+      <width>151</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Delay between checks:</string>
+    </property>
    </widget>
   </widget>
   <widget class="QWidget" name="Results">
