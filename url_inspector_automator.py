@@ -198,7 +198,7 @@ class URLInspector(UIClass, QtBaseClass):
 
 		if len(urls) == 0:
 			QtWidgets.QMessageBox.about(self, "Inspect URLs", "Please provide absolute URLs. For example: https://www.ranksense.com/")
-				return
+			return
 
 		for url in urls:
 			if urlparse(url).netloc == "":
