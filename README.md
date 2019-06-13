@@ -19,3 +19,10 @@ Make sure to completely exit the Chrome browser launched after you close the too
 Feel free to review the screenshtots to see how the tool looks and works.
 
 Please file bug reports as Github issues. Bug fixes and features are welcome as pull requests.
+
+# For Windows users
+Steps to install:
+
+1-2. Same as above
+3. Modify line 25 of url_inspector_automator.py to match your chrome.exe path. (C://{path-to-chrome-folder}/chrome.exe)
+4. Close all Chrome windows before launching the script.
